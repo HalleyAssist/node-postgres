@@ -39,7 +39,7 @@
     "test": "make test-all"
   },
   "files": [
-    "lib",
+    "packages/pg",
     "SPONSORS.md"
   ],
   "license": "MIT",
