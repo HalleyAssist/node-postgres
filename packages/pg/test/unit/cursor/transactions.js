@@ -1,6 +1,6 @@
 const assert = require('assert')
-const Cursor = require('../')
 const pg = require('pg')
+const Cursor = pg.Cursor
 
 describe('transactions', () => {
   it('can execute multiple statements in a transaction', async () => {

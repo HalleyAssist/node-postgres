@@ -1,6 +1,6 @@
 const assert = require('assert')
 const pg = require('pg')
-const Cursor = require('../')
+const Cursor = pg.Cursor
 
 describe('queries with no data', function () {
   beforeEach(function (done) {

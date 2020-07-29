@@ -1,6 +1,6 @@
 const assert = require('assert')
-const Cursor = require('../')
 const pg = require('pg')
+const Cursor = pg.Cursor
 
 const text = 'SELECT generate_series as num FROM generate_series(0, 50)'
 describe('close', function () {
