@@ -17,7 +17,7 @@
     "url": "git://github.com/brianc/node-postgres.git"
   },
   "author": "Brian Carlson <brian.m.carlson@gmail.com>",
-  "main": "./packages/pg/lib",
+  "main": "./packages/pg/lib/index.js",
   "dependencies": {
     "buffer-writer": "2.0.0",
     "packet-reader": "1.0.0",
