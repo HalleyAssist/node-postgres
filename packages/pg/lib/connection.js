@@ -2,7 +2,6 @@
 
 var net = require('net')
 var EventEmitter = require('events').EventEmitter
-var util = require('util')
 
 const { parse, serialize } = require('pg-protocol')
 
@@ -76,16 +75,26 @@ class Connection extends EventEmitter {
           return self.emit('error', new Error('There was an error establishing an SSL connection'))
       }
       var tls = require('tls')
-      const options = Object.assign(
-        {
-          socket: self.stream,
-        },
-        self.ssl
-      )
+      const options = {
+        socket: self.stream,
+      }
+
+      if (self.ssl !== true) {
+        Object.assign(options, self.ssl)
+
+        if ('key' in self.ssl) {
+          options.key = self.ssl.key
+        }
+      }
+
       if (net.isIP(host) === 0) {
         options.servername = host
       }
-      self.stream = tls.connect(options)
+      try {
+        self.stream = tls.connect(options)
+      } catch (err) {
+        return self.emit('error', err)
+      }
       self.attachListeners(self.stream)
       self.stream.on('error', reportStreamError)
 

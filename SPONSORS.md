@@ -8,6 +8,10 @@ node-postgres is made possible by the helpful contributors from the community as
 - [Nafundi](https://nafundi.com)
 - [CrateDB](https://crate.io/)
 - [BitMEX](https://www.bitmex.com/app/trade/XBTUSD)
+- [Dataform](https://dataform.co/)
+- [Eaze](https://www.eaze.com/)
+- [simpleanalytics](https://simpleanalytics.com/)
+- [n8n.io]https://n8n.io/
 
 # Supporters
 
@@ -31,3 +35,8 @@ node-postgres is made possible by the helpful contributors from the community as
 - Raul Murray
 - Simple Analytics
 - Trevor Linton
+- Ian Walter
+- @Guido4000
+- [Martti Laine](https://github.com/codeclown)
+- [Tim Nolet](https://github.com/tnolet)
+- [checkly](https://github.com/checkly)

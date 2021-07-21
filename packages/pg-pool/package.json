@@ -1,6 +1,6 @@
 {
   "name": "pg-pool",
-  "version": "3.2.1",
+  "version": "3.3.0",
   "description": "Connection pool for node-postgres",
   "main": "index.js",
   "directories": {
@@ -11,7 +11,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/brianc/node-postgres.git"
+    "url": "git://github.com/brianc/node-postgres.git",
+    "directory": "packages/pg-pool"
   },
   "keywords": [
     "pg",

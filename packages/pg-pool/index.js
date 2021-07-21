@@ -73,6 +73,13 @@ class Pool extends EventEmitter {
         value: options.password,
       })
     }
+    if (options != null && options.ssl && options.ssl.key) {
+      // "hiding" the ssl->key so it doesn't show up in stack traces
+      // or if the client is console.logged
+      Object.defineProperty(this.options.ssl, 'key', {
+        enumerable: false,
+      })
+    }
 
     this.options.max = this.options.max || this.options.poolSize || 10
     this.options.maxUses = this.options.maxUses || Infinity
@@ -161,7 +168,7 @@ class Pool extends EventEmitter {
     const result = response.result
 
     // if we don't have to connect a new client, don't do so
-    if (this._clients.length >= this.options.max || this._idle.length) {
+    if (this._isFull() || this._idle.length) {
       // if we have idle clients schedule a pulse immediately
       if (this._idle.length) {
         process.nextTick(() => this._pulseQueue())

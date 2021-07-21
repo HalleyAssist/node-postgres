@@ -111,16 +111,6 @@ assert.success = function (callback) {
   }
 }
 
-assert.throws = function (offender) {
-  try {
-    offender()
-  } catch (e) {
-    assert.ok(e instanceof Error, 'Expected ' + offender + ' to throw instances of Error')
-    return
-  }
-  assert.ok(false, 'Expected ' + offender + ' to throw exception')
-}
-
 assert.lengthIs = function (actual, expectedLength) {
   assert.equal(actual.length, expectedLength)
 }
@@ -232,6 +222,14 @@ var resetTimezoneOffset = function () {
   Date.prototype.getTimezoneOffset = getTimezoneOffset
 }
 
+const rejection = (promise) =>
+  promise.then(
+    (value) => {
+      throw new Error(`Promise resolved when rejection was expected; value: ${sys.inspect(value)}`)
+    },
+    (error) => error
+  )
+
 module.exports = {
   Sink: Sink,
   Suite: Suite,
@@ -242,4 +240,5 @@ module.exports = {
   Client: Client,
   setTimezoneOffset: setTimezoneOffset,
   resetTimezoneOffset: resetTimezoneOffset,
+  rejection: rejection,
 }
