@@ -1,7 +1,6 @@
 'use strict'
 
 var chai = require('chai')
-var expect = chai.expect
 chai.should()
 
 var parse = require('../').parse
@@ -63,8 +62,8 @@ describe('parse', function () {
     var sourceConfig = {
       user: 'brian',
       password: 'hello<ther>e',
-      port: 5432,
       host: 'localhost',
+      port: 5432,
       database: 'postgres',
     }
     var connectionString =
@@ -86,8 +85,8 @@ describe('parse', function () {
     var sourceConfig = {
       user: 'brian',
       password: 'hello:pass:world',
-      port: 5432,
       host: 'localhost',
+      port: 5432,
       database: 'postgres',
     }
     var connectionString =
@@ -149,6 +148,7 @@ describe('parse', function () {
 
   it('configuration parameter host overrides url host', function () {
     var subject = parse('pg://user:pass@localhost/dbname?host=/unix/socket')
+    subject.database.should.equal('dbname')
     subject.host.should.equal('/unix/socket')
   })
 
@@ -168,7 +168,7 @@ describe('parse', function () {
     subject.database.should.equal('%2Fdbname')
   })
 
-  it('configuration parameter host treats encoded socket as part of the db name', function () {
+  it('configuration parameter host treats encoded host as part of the db name', function () {
     var subject = parse('pg://user:pass@%2Funix%2Fsocket/dbname?host=localhost')
     subject.user.should.equal('user')
     subject.password.should.equal('pass')
@@ -316,5 +316,11 @@ describe('parse', function () {
     var connectionString = 'pg:///?keepalives=1&keepalives=0'
     var subject = parse(connectionString)
     subject.keepalives.should.equal('0')
+  })
+
+  it('use the port specified in the query parameters', function () {
+    var connectionString = 'postgres:///?host=localhost&port=1234'
+    var subject = parse(connectionString)
+    subject.port.should.equal('1234')
   })
 })

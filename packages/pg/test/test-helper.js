@@ -1,12 +1,11 @@
 'use strict'
-// make assert a global...
-global.assert = require('assert')
+const assert = require('assert')
 var sys = require('util')
 
 const Suite = require('./suite')
 const args = require('./cli')
 
-global.Client = require('./../lib').Client
+const Client = require('./../lib').Client
 
 process.on('uncaughtException', function (d) {
   if ('stack' in d && 'message' in d) {
@@ -157,17 +156,6 @@ assert.isNull = function (item, message) {
   assert.ok(item === null, message)
 }
 
-global.test = function (name, action) {
-  test.testCount++
-  test[name] = action
-  var result = test[name]()
-  if (result === false) {
-    process.stdout.write('?')
-  } else {
-    process.stdout.write('.')
-  }
-}
-
 // print out the filename
 process.stdout.write(require('path').basename(process.argv[1]))
 if (args.binary) process.stdout.write(' (binary)')
@@ -182,33 +170,6 @@ process.on('uncaughtException', function (err) {
   // causes xargs to abort right away
   process.exit(255)
 })
-
-var Sink = function (expected, timeout, callback) {
-  var defaultTimeout = 5000
-  if (typeof timeout === 'function') {
-    callback = timeout
-    timeout = defaultTimeout
-  }
-  timeout = timeout || defaultTimeout
-  var internalCount = 0
-  var kill = function () {
-    assert.ok(false, 'Did not reach expected ' + expected + ' with an idle timeout of ' + timeout)
-  }
-  var killTimeout = setTimeout(kill, timeout)
-  return {
-    add: function (count) {
-      count = count || 1
-      internalCount += count
-      clearTimeout(killTimeout)
-      if (internalCount < expected) {
-        killTimeout = setTimeout(kill, timeout)
-      } else {
-        assert.equal(internalCount, expected)
-        callback()
-      }
-    },
-  }
-}
 
 var getTimezoneOffset = Date.prototype.getTimezoneOffset
 
@@ -231,7 +192,6 @@ const rejection = (promise) =>
   )
 
 module.exports = {
-  Sink: Sink,
   Suite: Suite,
   pg: require('./../lib/'),
   args: args,

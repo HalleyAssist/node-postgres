@@ -2,6 +2,7 @@
 const net = require('net')
 const buffers = require('../../test-buffers')
 const helper = require('./test-helper')
+const assert = require('assert')
 
 const suite = new helper.Suite()
 
@@ -67,7 +68,7 @@ suite.test('successful connection', (done) => {
 })
 
 suite.test('expired connection timeout', (done) => {
-  const opts = { ...options, port: 54322 }
+  const opts = { ...options, port: options.port + 1 }
   serverWithConnectionTimeout(opts.port, opts.connectionTimeoutMillis * 2, (closeServer) => {
     const timeoutId = setTimeout(() => {
       throw new Error('Client should have emitted an error but it did not.')

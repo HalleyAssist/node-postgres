@@ -136,7 +136,7 @@ because its so common to just run a query and return the client to the pool afte
 var pool = new Pool()
 var time = await pool.query('SELECT NOW()')
 var name = await pool.query('select $1::text as name', ['brianc'])
-console.log(name.rows[0].name, 'says hello at', time.rows[0].name)
+console.log(name.rows[0].name, 'says hello at', time.rows[0].now)
 ```
 
 you can also use a callback here if you'd like:
@@ -165,7 +165,7 @@ pool.connect((err, client, done) => {
   client.query('SELECT $1::text as name', ['pg-pool'], (err, res) => {
     done()
     if (err) {
-      return console.error('query error', e.message, e.stack)
+      return console.error('query error', err.message, err.stack)
     }
     console.log('hello from', res.rows[0].name)
   })

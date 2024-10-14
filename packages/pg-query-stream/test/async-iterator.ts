@@ -88,11 +88,16 @@ if (!process.version.startsWith('v8')) {
         rows.push(row)
         break
       }
-      for await (const row of stream) {
-        rows.push(row)
-      }
-      for await (const row of stream) {
-        rows.push(row)
+
+      try {
+        for await (const row of stream) {
+          rows.push(row)
+        }
+        for await (const row of stream) {
+          rows.push(row)
+        }
+      } catch (e) {
+        // swallow error - node 17 throws if stream is aborted
       }
       assert.strictEqual(rows.length, 1)
       client.release()
@@ -109,6 +114,20 @@ if (!process.version.startsWith('v8')) {
         await new Promise((resolve) => setTimeout(resolve, 1))
       }
       assert.strictEqual(rows.length, 201)
+      client.release()
+      await pool.end()
+    })
+
+    it('supports breaking with low watermark', async function () {
+      const pool = new pg.Pool({ max: 1 })
+      const client = await pool.connect()
+
+      /* eslint-disable @typescript-eslint/no-unused-vars */
+      for await (const _ of client.query(new QueryStream('select TRUE', [], { highWaterMark: 1 }))) break
+      for await (const _ of client.query(new QueryStream('select TRUE', [], { highWaterMark: 1 }))) break
+      for await (const _ of client.query(new QueryStream('select TRUE', [], { highWaterMark: 1 }))) break
+      /* eslint-enable @typescript-eslint/no-unused-vars */
+
       client.release()
       await pool.end()
     })

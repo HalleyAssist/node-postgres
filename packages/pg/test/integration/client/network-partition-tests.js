@@ -2,6 +2,7 @@
 var buffers = require('../../test-buffers')
 var helper = require('./test-helper')
 var suite = new helper.Suite()
+const assert = require('assert')
 
 var net = require('net')
 
@@ -11,7 +12,6 @@ var Server = function (response) {
   this.response = response
 }
 
-let port = 54321
 Server.prototype.start = function (cb) {
   // this is our fake postgres server
   // it responds with our specified response immediatley after receiving every buffer
@@ -40,14 +40,13 @@ Server.prototype.start = function (cb) {
     }.bind(this)
   )
 
-  port = port + 1
-
-  var options = {
-    host: 'localhost',
-    port: port,
-  }
-  this.server.listen(options.port, options.host, function () {
-    cb(options)
+  const host = 'localhost'
+  this.server.listen({ host, port: 0 }, () => {
+    const port = this.server.address().port
+    cb({
+      host,
+      port,
+    })
   })
 }
 

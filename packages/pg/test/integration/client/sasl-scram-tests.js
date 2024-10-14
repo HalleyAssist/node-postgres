@@ -3,6 +3,7 @@ const helper = require('./../test-helper')
 const pg = helper.pg
 const suite = new helper.Suite()
 const { native } = helper.args
+const assert = require('assert')
 
 /**
  * This test only executes if the env variables SCRAM_TEST_PGUSER and
@@ -68,6 +69,27 @@ suite.testAsync('sasl/scram fails when password is wrong', async () => {
     () => client.connect(),
     {
       code: '28P01',
+    },
+    'Error code should be for a password error'
+  )
+  assert.ok(usingSasl, 'Should be using SASL for authentication')
+})
+
+suite.testAsync('sasl/scram fails when password is empty', async () => {
+  const client = new pg.Client({
+    ...config,
+    // We use a password function here so the connection defaults do not
+    // override the empty string value with one from process.env.PGPASSWORD
+    password: () => '',
+  })
+  let usingSasl = false
+  client.connection.once('authenticationSASL', () => {
+    usingSasl = true
+  })
+  await assert.rejects(
+    () => client.connect(),
+    {
+      message: 'SASL: SCRAM-SERVER-FIRST-MESSAGE: client password must be a non-empty string',
     },
     'Error code should be for a password error'
   )

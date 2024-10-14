@@ -7,7 +7,7 @@ params := $(connectionString)
 node-command := xargs -n 1 -I file node file $(params)
 
 .PHONY : test test-connection test-integration bench test-native \
-	 publish test-missing-native update-npm
+	 publish update-npm
 
 all:
 	npm install
@@ -17,7 +17,7 @@ help:
 
 test: test-unit
 
-test-all: test-missing-native test-unit test-integration test-native
+test-all: test-unit test-integration test-native test-worker
 
 
 update-npm:
@@ -33,21 +33,14 @@ test-connection:
 	@echo "***Testing connection***"
 	@node script/create-test-tables.js $(params)
 
-test-missing-native:
-	@echo "***Testing optional native install***"
-	@rm -rf node_modules/pg-native
-	@rm -rf node_modules/libpq
-	@node test/native/missing-native.js
-	@rm -rf node_modules/pg-native
-	@rm -rf node_modules/libpq
-
-node_modules/pg-native/index.js:
-	@npm i --no-save pg-native
-
-test-native: node_modules/pg-native/index.js test-connection
+test-native: test-connection
 	@echo "***Testing native bindings***"
+ifeq ($(TEST_SKIP_NATIVE), true)
+	@echo "***Skipping tests***"
+else
 	@find test/native -name "*-tests.js" | $(node-command)
 	@find test/integration -name "*-tests.js" | $(node-command) native
+endif
 
 test-integration: test-connection
 	@echo "***Testing Pure Javascript***"
@@ -59,3 +52,7 @@ test-binary: test-connection
 
 test-pool:
 	@find test/integration/connection-pool -name "*.js" | $(node-command) binary
+
+test-worker:
+	@echo "***Testing Cloudflare Worker support***"
+	@node test/worker/src/index.test.js
