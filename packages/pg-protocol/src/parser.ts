@@ -106,9 +106,6 @@ export class Parser {
         break
       }
     }
-    if(buffer === this.buffer) {
-      this.buffer = Buffer.from(this.buffer)
-    }
     if (offset === bufferFullLength) {
       // No more use for the buffer
       this.buffer = emptyBuffer
@@ -148,7 +145,7 @@ export class Parser {
       buffer.copy(this.buffer, this.bufferOffset + this.bufferLength)
       this.bufferLength = newLength
     } else {
-      this.buffer = buffer
+      this.buffer = Buffer.from(buffer)
       this.bufferOffset = 0
       this.bufferLength = buffer.byteLength
     }
