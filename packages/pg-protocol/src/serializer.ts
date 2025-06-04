@@ -36,7 +36,7 @@ const startup = (opts: Record<string, string>): Buffer => {
 }
 
 const requestSsl = (): Buffer => {
-  const response = Buffer.allocUnsafe(8)
+  const response = Buffer.allocUnsafeSlow(8)
   response.writeInt32BE(8, 0)
   response.writeInt32BE(80877103, 4)
   return response
@@ -183,7 +183,7 @@ const execute = (config?: ExecOpts): Buffer => {
   const portalLength = Buffer.byteLength(portal)
   const len = 4 + portalLength + 1 + 4
   // one extra bit for code
-  const buff = Buffer.allocUnsafe(1 + len)
+  const buff = Buffer.allocUnsafeSlow(1 + len)
   buff[0] = code.execute
   buff.writeInt32BE(len, 1)
   buff.write(portal, 5, 'utf-8')
@@ -193,7 +193,7 @@ const execute = (config?: ExecOpts): Buffer => {
 }
 
 const cancel = (processID: number, secretKey: number): Buffer => {
-  const buffer = Buffer.allocUnsafe(16)
+  const buffer = Buffer.allocUnsafeSlow(16)
   buffer.writeInt32BE(16, 0)
   buffer.writeInt16BE(1234, 4)
   buffer.writeInt16BE(5678, 6)
@@ -211,7 +211,7 @@ const cstringMessage = (code: code, string: string): Buffer => {
   const stringLen = Buffer.byteLength(string)
   const len = 4 + stringLen + 1
   // one extra bit for code
-  const buffer = Buffer.allocUnsafe(1 + len)
+  const buffer = Buffer.allocUnsafeSlow(1 + len)
   buffer[0] = code
   buffer.writeInt32BE(len, 1)
   buffer.write(string, 5, 'utf-8')

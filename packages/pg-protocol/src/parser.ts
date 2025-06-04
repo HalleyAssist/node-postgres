@@ -106,6 +106,9 @@ export class Parser {
         break
       }
     }
+    if(buffer === this.buffer) {
+      this.buffer = Buffer.from(this.buffer)
+    }
     if (offset === bufferFullLength) {
       // No more use for the buffer
       this.buffer = emptyBuffer
@@ -134,7 +137,7 @@ export class Parser {
           while (newLength >= newBufferLength) {
             newBufferLength *= 2
           }
-          newBuffer = Buffer.allocUnsafe(newBufferLength)
+          newBuffer = Buffer.allocUnsafeSlow(newBufferLength)
         }
         // Move the remaining buffer to the new one
         this.buffer.copy(newBuffer, 0, this.bufferOffset, this.bufferOffset + this.bufferLength)

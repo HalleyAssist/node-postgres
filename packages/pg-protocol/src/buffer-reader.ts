@@ -1,4 +1,4 @@
-const emptyBuffer = Buffer.allocUnsafe(0)
+const emptyBuffer = Buffer.allocUnsafeSlow(0)
 
 export class BufferReader {
   private buffer: Buffer = emptyBuffer

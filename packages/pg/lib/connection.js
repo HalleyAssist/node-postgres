@@ -40,7 +40,7 @@ class Connection extends EventEmitter {
 
     this._connecting = true
     this.stream.setNoDelay(true)
-    this.stream.connect(port, host)
+    this.stream.connect({port, host})
 
     this.stream.once('connect', function () {
       if (self._keepAlive) {
