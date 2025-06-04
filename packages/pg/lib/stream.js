@@ -33,49 +33,6 @@ function getNodejsStreamFuncs() {
   }
 }
 
-/**
- * The stream functions that work in Cloudflare Workers
- */
-function getCloudflareStreamFuncs() {
-  function getStream(ssl) {
-    const { CloudflareSocket } = require('pg-cloudflare')
-    return new CloudflareSocket(ssl)
-  }
-
-  function getSecureStream(options) {
-    options.socket.startTls(options)
-    return options.socket
-  }
-  return {
-    getStream,
-    getSecureStream,
-  }
-}
-
-/**
- * Are we running in a Cloudflare Worker?
- *
- * @returns true if the code is currently running inside a Cloudflare Worker.
- */
-function isCloudflareRuntime() {
-  // Since 2022-03-21 the `global_navigator` compatibility flag is on for Cloudflare Workers
-  // which means that `navigator.userAgent` will be defined.
-  if (typeof navigator === 'object' && navigator !== null && typeof navigator.userAgent === 'string') {
-    return navigator.userAgent === 'Cloudflare-Workers'
-  }
-  // In case `navigator` or `navigator.userAgent` is not defined then try a more sneaky approach
-  if (typeof Response === 'function') {
-    const resp = new Response(null, { cf: { thing: true } })
-    if (typeof resp.cf === 'object' && resp.cf !== null && resp.cf.thing) {
-      return true
-    }
-  }
-  return false
-}
-
 function getStreamFuncs() {
-  if (isCloudflareRuntime()) {
-    return getCloudflareStreamFuncs()
-  }
   return getNodejsStreamFuncs()
 }
