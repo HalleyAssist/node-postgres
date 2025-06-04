@@ -50,7 +50,7 @@
     }
   },
   "scripts": {
-    "build": "cd ./packages/pg-protocol && npm install",
+    "preinstall": "cd ./packages/pg-protocol && npm b",
     "test": "make test-all"
   },
   "files": [
