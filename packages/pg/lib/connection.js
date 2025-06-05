@@ -2,7 +2,7 @@
 
 var EventEmitter = require('events').EventEmitter
 
-const { parse, serialize } = require('pg-protocol')
+const { parse, serialize } = require('../../pg-protocol/dist')
 const { getStream, getSecureStream } = require('./stream')
 
 const flushBuffer = serialize.flush()

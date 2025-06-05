@@ -4,7 +4,7 @@ var Client = require('./client')
 var defaults = require('./defaults')
 var Connection = require('./connection')
 var Pool = require('pg-pool')
-const { DatabaseError } = require('pg-protocol')
+const { DatabaseError } = require('../../pg-protocol/dist')
 const { escapeIdentifier, escapeLiteral } = require('./utils')
 
 const poolFactory = (Client) => {
