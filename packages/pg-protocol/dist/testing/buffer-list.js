@@ -20,15 +20,15 @@ class BufferList {
         return this.add(Buffer.from([(val >>> 24) & 0xff, (val >>> 16) & 0xff, (val >>> 8) & 0xff, (val >>> 0) & 0xff]), first);
     }
     addCString(val, front) {
-        var len = Buffer.byteLength(val);
-        var buffer = Buffer.alloc(len + 1);
+        let len = Buffer.byteLength(val);
+        let buffer = Buffer.alloc(len + 1);
         buffer.write(val);
         buffer[len] = 0;
         return this.add(buffer, front);
     }
     addString(val, front) {
-        var len = Buffer.byteLength(val);
-        var buffer = Buffer.alloc(len);
+        let len = Buffer.byteLength(val);
+        let buffer = Buffer.alloc(len);
         buffer.write(val);
         return this.add(buffer, front);
     }
@@ -39,7 +39,7 @@ class BufferList {
         return this.add(Buffer.from([byte]));
     }
     join(appendLength, char) {
-        var length = this.getByteLength();
+        let length = this.getByteLength();
         if (appendLength) {
             this.addInt32(length + 4, true);
             return this.join(false, char);
@@ -48,8 +48,8 @@ class BufferList {
             this.addChar(char, true);
             length++;
         }
-        var result = Buffer.alloc(length);
-        var index = 0;
+        let result = Buffer.alloc(length);
+        let index = 0;
         this.buffers.forEach(function (buffer) {
             buffer.copy(result, index, 0);
             index += buffer.length;
@@ -57,8 +57,8 @@ class BufferList {
         return result;
     }
     static concat() {
-        var total = new BufferList();
-        for (var i = 0; i < arguments.length; i++) {
+        let total = new BufferList();
+        for (let i = 0; i < arguments.length; i++) {
             total.add(arguments[i]);
         }
         return total.join();

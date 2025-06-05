@@ -41,7 +41,7 @@ const buffers = {
     },
     rowDescription: function (fields) {
         fields = fields || [];
-        var buf = new buffer_list_1.default();
+        let buf = new buffer_list_1.default();
         buf.addInt16(fields.length);
         fields.forEach(function (field) {
             buf
@@ -57,7 +57,7 @@ const buffers = {
     },
     parameterDescription: function (dataTypeIDs) {
         dataTypeIDs = dataTypeIDs || [];
-        var buf = new buffer_list_1.default();
+        let buf = new buffer_list_1.default();
         buf.addInt16(dataTypeIDs.length);
         dataTypeIDs.forEach(function (dataTypeID) {
             buf.addInt32(dataTypeID);
@@ -66,14 +66,14 @@ const buffers = {
     },
     dataRow: function (columns) {
         columns = columns || [];
-        var buf = new buffer_list_1.default();
+        let buf = new buffer_list_1.default();
         buf.addInt16(columns.length);
         columns.forEach(function (col) {
             if (col == null) {
                 buf.addInt32(-1);
             }
             else {
-                var strBuf = Buffer.from(col, 'utf8');
+                let strBuf = Buffer.from(col, 'utf8');
                 buf.addInt32(strBuf.length);
                 buf.add(strBuf);
             }
@@ -88,7 +88,7 @@ const buffers = {
     },
     errorOrNotice: function (fields) {
         fields = fields || [];
-        var buf = new buffer_list_1.default();
+        let buf = new buffer_list_1.default();
         fields.forEach(function (field) {
             buf.addChar(field.type);
             buf.addCString(field.value);

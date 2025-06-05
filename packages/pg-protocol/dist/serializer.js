@@ -10,9 +10,9 @@ const startup = (opts) => {
         writer.addCString(key).addCString(opts[key]);
     }
     writer.addCString('client_encoding').addCString('UTF8');
-    var bodyBuffer = writer.addCString('').flush();
+    let bodyBuffer = writer.addCString('').flush();
     // this message is sent without a code
-    var length = bodyBuffer.length + 4;
+    let length = bodyBuffer.length + 4;
     return new buffer_writer_1.Writer().addInt32(length).add(bodyBuffer).flush();
 };
 const requestSsl = () => {
@@ -51,12 +51,12 @@ const parse = (query) => {
         /* eslint-enable no-console */
     }
     const types = query.types || emptyArray;
-    var len = types.length;
-    var buffer = writer
+    let len = types.length;
+    let buffer = writer
         .addCString(name) // name of query
         .addCString(query.text) // actual query text
         .addInt16(len);
-    for (var i = 0; i < len; i++) {
+    for (let i = 0; i < len; i++) {
         buffer.addInt32(types[i]);
     }
     return writer.flush(80 /* code.parse */);
