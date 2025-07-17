@@ -1,14 +1,10 @@
 'use strict'
 
-const { EventEmitter } = require('events')
-
 const Result = require('./result')
 const utils = require('./utils')
 
-class Query extends EventEmitter {
+class Query {
   constructor(config, values, callback) {
-    super()
-
     config = utils.normalizeQueryConfig(config, values, callback)
 
     this.text = config.text
@@ -93,7 +89,6 @@ class Query extends EventEmitter {
       return
     }
 
-    this.emit('row', row, this._result)
     if (this._accumulateRows) {
       this._result.addRow(row)
     }
@@ -130,7 +125,6 @@ class Query extends EventEmitter {
     if (this.callback) {
       return this.callback(err)
     }
-    this.emit('error', err)
   }
 
   handleReadyForQuery(con) {
@@ -146,7 +140,6 @@ class Query extends EventEmitter {
         })
       }
     }
-    this.emit('end', this._results)
   }
 
   submit(connection) {
