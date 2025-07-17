@@ -154,16 +154,7 @@ function dateToStringUTC(date) {
 function normalizeQueryConfig(config, values, callback) {
   // can take in strings or config objects
   config = typeof config === 'string' ? { text: config } : config
-  if (values) {
-    if (typeof values === 'function') {
-      config.callback = values
-    } else {
-      config.values = values
-    }
-  }
-  if (callback) {
-    config.callback = callback
-  }
+  
   return config
 }
 

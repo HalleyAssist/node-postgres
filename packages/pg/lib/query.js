@@ -7,25 +7,48 @@ class Query {
   constructor(config, values, callback) {
     config = utils.normalizeQueryConfig(config, values, callback)
 
-    this.text = config.text
-    this.values = config.values
-    this.rows = config.rows
-    this.types = config.types
-    this.name = config.name
-    this.queryMode = config.queryMode
-    this.binary = config.binary
-    // use unique portal name each time
-    this.portal = config.portal || ''
-    this.callback = config.callback
-    this._rowMode = config.rowMode
-    if (process.domain && config.callback) {
-      this.callback = process.domain.bind(config.callback)
+    this._config = config
+
+    if (typeof values === 'function') {
+      callback = values
+      values = undefined
     }
-    this._result = new Result(this._rowMode, this.types)
+    this.values = values
+
+    if (callback) {
+      this.callback = callback
+    }
+
+    this._result = new Result(this._config.rowMode, this.types)
 
     // potential for multiple results
     this._results = this._result
     this._canceledDueToError = false
+  }
+
+  get text() {
+    return this._config.text
+  }
+  get rows() {
+    return this._config.rows
+  }
+  get types() {
+    return this._config.types
+  }
+  get name() {
+    return this._config.name
+  }
+  get queryMode() {
+    return this._config.queryMode
+  }
+  get binary() {
+    return this._config.binary
+  }
+  get portal() {
+    return this._config.portal || ''
+  }
+  get callback() {
+    return this._config.callback
   }
 
   requiresPreparation() {
@@ -61,7 +84,7 @@ class Query {
       if (!Array.isArray(this._results)) {
         this._results = [this._result]
       }
-      this._result = new Result(this._rowMode, this._result._types)
+      this._result = new Result(this._config.rowMode, this._result._types)
       this._results.push(this._result)
     }
   }
