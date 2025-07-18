@@ -16,9 +16,8 @@ class Result {
     this.fields = []
     this._parsers = undefined
     this._types = types
-    this.RowCtor = null
-    this.rowAsArray = rowMode === 'array'
-    if (this.rowAsArray) {
+    const rowAsArray = rowMode === 'array'
+    if (rowAsArray) {
       this.parseRow = this._parseRowAsArray
     }
     this._prebuiltEmptyResultObject = null
