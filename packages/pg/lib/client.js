@@ -491,6 +491,7 @@ class Client extends EventEmitter {
       }
     } else {
       readTimeout = config.query_timeout || this.connectionParameters.query_timeout
+      console.log({config, values})
       query = new Query(config, values, callback)
       if (!query.callback) {
         result = new this._Promise((resolve, reject) => {
