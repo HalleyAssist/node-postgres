@@ -211,8 +211,8 @@ const cstringMessage = (code: code, string: string): Buffer => {
   return buffer
 }
 
-const emptyDescribePortal = writer.addCString('P').flush(code.describe)
-const emptyDescribeStatement = writer.addCString('S').flush(code.describe)
+const emptyDescribePortal = Buffer.from(writer.addCString('P').flush(code.describe))
+const emptyDescribeStatement = Buffer.from(writer.addCString('S').flush(code.describe))
 
 const describe = (msg: PortalOpts): Buffer => {
   return msg.name

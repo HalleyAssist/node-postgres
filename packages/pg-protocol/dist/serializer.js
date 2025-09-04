@@ -135,8 +135,8 @@ const cstringMessage = (code, string) => {
     buffer[len] = 0; // null terminate cString
     return buffer;
 };
-const emptyDescribePortal = writer.addCString('P').flush(68 /* code.describe */);
-const emptyDescribeStatement = writer.addCString('S').flush(68 /* code.describe */);
+const emptyDescribePortal = Buffer.from(writer.addCString('P').flush(68 /* code.describe */));
+const emptyDescribeStatement = Buffer.from(writer.addCString('S').flush(68 /* code.describe */));
 const describe = (msg) => {
     return msg.name
         ? cstringMessage(68 /* code.describe */, `${msg.type}${msg.name || ''}`)
