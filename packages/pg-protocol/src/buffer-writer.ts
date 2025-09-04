@@ -1,11 +1,11 @@
 //binary data writer tuned for encoding binary specific to the postgres binary protocol
 
 const MaxSize = 8192 //8kb
+const HeaderPosition = 0
 
 export class Writer {
   private buffer: Buffer
   private offset: number = 5
-  private headerPosition: number = 0
   constructor(private size = 512) {
     this.buffer = Buffer.allocUnsafeSlow(size)
   }
@@ -81,10 +81,10 @@ export class Writer {
 
   private join(code?: number): Buffer {
     if (code) {
-      this.buffer[this.headerPosition] = code
+      this.buffer[HeaderPosition] = code
       //length is everything in this packet minus the code
-      const length = this.offset - (this.headerPosition + 1)
-      this.buffer.writeInt32BE(length, this.headerPosition + 1)
+      const length = this.offset - (HeaderPosition + 1)
+      this.buffer.writeInt32BE(length, HeaderPosition + 1)
     }
     return this.buffer.slice(code ? 0 : 5, this.offset)
   }
@@ -92,7 +92,6 @@ export class Writer {
   public flush(code?: number): Buffer {
     let result = this.join(code)
     this.offset = 5
-    this.headerPosition = 0
     if(this.buffer.length > MaxSize) {
       this.buffer = Buffer.allocUnsafeSlow(this.size)
     }

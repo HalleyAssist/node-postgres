@@ -3,11 +3,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Writer = void 0;
 const MaxSize = 8192; //8kb
+const HeaderPosition = 0;
 class Writer {
     constructor(size = 512) {
         this.size = size;
         this.offset = 5;
-        this.headerPosition = 0;
         this.buffer = Buffer.allocUnsafeSlow(size);
     }
     ensure(size) {
@@ -74,17 +74,16 @@ class Writer {
     }
     join(code) {
         if (code) {
-            this.buffer[this.headerPosition] = code;
+            this.buffer[HeaderPosition] = code;
             //length is everything in this packet minus the code
-            const length = this.offset - (this.headerPosition + 1);
-            this.buffer.writeInt32BE(length, this.headerPosition + 1);
+            const length = this.offset - (HeaderPosition + 1);
+            this.buffer.writeInt32BE(length, HeaderPosition + 1);
         }
         return this.buffer.slice(code ? 0 : 5, this.offset);
     }
     flush(code) {
         let result = this.join(code);
         this.offset = 5;
-        this.headerPosition = 0;
         if (this.buffer.length > MaxSize) {
             this.buffer = Buffer.allocUnsafeSlow(this.size);
         }

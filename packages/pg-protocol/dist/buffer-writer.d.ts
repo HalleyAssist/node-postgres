@@ -3,7 +3,6 @@ export declare class Writer {
     private size;
     private buffer;
     private offset;
-    private headerPosition;
     constructor(size?: number);
     private ensure;
     addInt32(num: number): Writer;
