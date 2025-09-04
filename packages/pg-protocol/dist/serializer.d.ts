@@ -23,7 +23,6 @@ declare const serialize: {
     startup: (opts: Record<string, string>) => Buffer;
     password: (password: string) => Buffer;
     requestSsl: () => Buffer;
-    sendSASLInitialResponseMessage: (mechanism: string, initialResponse: string) => Buffer;
     sendSCRAMClientFinalMessage: (additionalData: string) => Buffer;
     query: (text: string) => Buffer;
     parse: (query: ParseOpts) => Buffer;

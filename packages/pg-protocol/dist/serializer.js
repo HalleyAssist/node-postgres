@@ -24,11 +24,6 @@ const requestSsl = () => {
 const password = (password) => {
     return writer.addCString(password).flush(112 /* code.startup */);
 };
-const sendSASLInitialResponseMessage = function (mechanism, initialResponse) {
-    // 0x70 = 'p'
-    writer.addCString(mechanism).addString32(initialResponse);
-    return writer.flush(112 /* code.startup */);
-};
 const sendSCRAMClientFinalMessage = function (additionalData) {
     return writer.addString(additionalData).flush(112 /* code.startup */);
 };
@@ -168,7 +163,6 @@ const serialize = {
     startup,
     password,
     requestSsl,
-    sendSASLInitialResponseMessage,
     sendSCRAMClientFinalMessage,
     query,
     parse,

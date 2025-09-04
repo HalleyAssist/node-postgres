@@ -33,10 +33,6 @@ describe('serializer', () => {
         const expected = new buffer_list_1.default().addInt32(80877103).join(true);
         assert_1.default.deepEqual(actual, expected);
     });
-    it('builds SASLInitialResponseMessage message', function () {
-        const actual = serializer_1.serialize.sendSASLInitialResponseMessage('mech', 'data');
-        assert_1.default.deepEqual(actual, new buffer_list_1.default().addCString('mech').addInt32(4).addString('data').join(true, 'p'));
-    });
     it('builds SCRAMClientFinalMessage message', function () {
         const actual = serializer_1.serialize.sendSCRAMClientFinalMessage('data');
         assert_1.default.deepEqual(actual, new buffer_list_1.default().addString('data').join(true, 'p'));
