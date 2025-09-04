@@ -26,7 +26,7 @@ const password = (password) => {
 };
 const sendSASLInitialResponseMessage = function (mechanism, initialResponse) {
     // 0x70 = 'p'
-    writer.addCString(mechanism).addInt32(Buffer.byteLength(initialResponse)).addString(initialResponse);
+    writer.addCString(mechanism).addString32(initialResponse);
     return writer.flush(112 /* code.startup */);
 };
 const sendSCRAMClientFinalMessage = function (additionalData) {
@@ -81,8 +81,7 @@ const writeValues = function (values, valueMapper) {
         else {
             // add the param type (string) to the writer
             writer.addInt16(0 /* ParamType.STRING */);
-            paramWriter.addInt32(Buffer.byteLength(mappedVal));
-            paramWriter.addString(mappedVal);
+            paramWriter.addString32(mappedVal);
         }
     }
 };

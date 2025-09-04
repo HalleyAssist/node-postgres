@@ -10,6 +10,7 @@ export declare class Writer {
     addInt16(num: number): Writer;
     addCString(string: string): Writer;
     addString(string?: string): Writer;
+    addString32(string?: string): Writer;
     add(otherBuffer: Buffer): Writer;
     private join;
     flush(code?: number): Buffer;

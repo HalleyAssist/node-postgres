@@ -1,4 +1,3 @@
-/// <reference types="node" />
 type ParseOpts = {
     name?: string;
     types?: number[];

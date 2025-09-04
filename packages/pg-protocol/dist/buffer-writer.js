@@ -2,8 +2,9 @@
 //binary data writer tuned for encoding binary specific to the postgres binary protocol
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Writer = void 0;
+const MaxSize = 8192; //8kb
 class Writer {
-    constructor(size = 256) {
+    constructor(size = 512) {
         this.size = size;
         this.offset = 5;
         this.headerPosition = 0;
@@ -54,6 +55,17 @@ class Writer {
         this.offset += len;
         return this;
     }
+    addString32(string = '') {
+        let len = Buffer.byteLength(string);
+        this.ensure(len + 4);
+        this.buffer[this.offset++] = (len >>> 24) & 0xff;
+        this.buffer[this.offset++] = (len >>> 16) & 0xff;
+        this.buffer[this.offset++] = (len >>> 8) & 0xff;
+        this.buffer[this.offset++] = (len >>> 0) & 0xff;
+        this.buffer.write(string, this.offset);
+        this.offset += len;
+        return this;
+    }
     add(otherBuffer) {
         this.ensure(otherBuffer.length);
         otherBuffer.copy(this.buffer, this.offset);
@@ -73,7 +85,9 @@ class Writer {
         let result = this.join(code);
         this.offset = 5;
         this.headerPosition = 0;
-        this.buffer = Buffer.allocUnsafeSlow(this.size);
+        if (this.buffer.length > MaxSize) {
+            this.buffer = Buffer.allocUnsafeSlow(this.size);
+        }
         return result;
     }
 }
