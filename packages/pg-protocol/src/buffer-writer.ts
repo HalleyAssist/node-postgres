@@ -1,10 +1,12 @@
 //binary data writer tuned for encoding binary specific to the postgres binary protocol
 
+const MaxSize = 8192 //8kb
+
 export class Writer {
   private buffer: Buffer
   private offset: number = 5
   private headerPosition: number = 0
-  constructor(private size = 256) {
+  constructor(private size = 512) {
     this.buffer = Buffer.allocUnsafeSlow(size)
   }
 
@@ -91,7 +93,9 @@ export class Writer {
     let result = this.join(code)
     this.offset = 5
     this.headerPosition = 0
-    this.buffer = Buffer.allocUnsafeSlow(this.size)
+    if(this.buffer.length > MaxSize) {
+      this.buffer = Buffer.allocUnsafeSlow(this.size)
+    }
     return result
   }
 }
