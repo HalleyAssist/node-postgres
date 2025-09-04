@@ -5,9 +5,9 @@ var EventEmitter = require('events').EventEmitter
 const { parse, serialize } = require('../../pg-protocol/dist')
 const { getStream, getSecureStream } = require('./stream')
 
-const flushBuffer = serialize.flush()
-const syncBuffer = serialize.sync()
-const endBuffer = serialize.end()
+const flushBuffer = Buffer.from(serialize.flush())
+const syncBuffer = Buffer.from(serialize.sync())
+const endBuffer = Buffer.from(serialize.end())
 
 // TODO(bmc) support binary mode at some point
 class Connection extends EventEmitter {
