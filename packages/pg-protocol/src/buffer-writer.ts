@@ -58,6 +58,18 @@ export class Writer {
     return this
   }
 
+  public addString32(string: string = ''): Writer {
+    let len = Buffer.byteLength(string)
+    this.ensure(len + 4)
+    this.buffer[this.offset++] = (len >>> 24) & 0xff
+    this.buffer[this.offset++] = (len >>> 16) & 0xff
+    this.buffer[this.offset++] = (len >>> 8) & 0xff
+    this.buffer[this.offset++] = (len >>> 0) & 0xff
+    this.buffer.write(string, this.offset)
+    this.offset += len
+    return this
+  }
+
   public add(otherBuffer: Buffer): Writer {
     this.ensure(otherBuffer.length)
     otherBuffer.copy(this.buffer, this.offset)
