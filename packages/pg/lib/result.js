@@ -23,6 +23,15 @@ class Result {
     this._prebuiltEmptyResultObject = null
   }
 
+  clear(){
+    this.command = null
+    this.rowCount = null
+    this.oid = null
+    this.rows = []
+    this.fields = []
+    this._parsers = undefined
+  }
+
   // adds a command complete message
   addCommandComplete(msg) {
     var match

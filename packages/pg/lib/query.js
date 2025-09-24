@@ -47,6 +47,12 @@ class Query {
   get portal() {
     return this._config.portal || ''
   }
+  get query_timeout(){
+    return this._config.query_timeout
+  }
+  clear(){
+    this._result.clear()
+  }
 
   requiresPreparation() {
     if (this.queryMode === 'extended') {
