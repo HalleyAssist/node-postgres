@@ -71,6 +71,8 @@ class Parser {
     }
     handlePacket(offset, code, length) {
         switch (code) {
+            case 68 /* MessageCodes.DataRow */:
+                return this.parseDataRowMessage(offset, length, this.buffer);
             case 50 /* MessageCodes.BindComplete */:
                 return messages_1.bindComplete;
             case 49 /* MessageCodes.ParseComplete */:
@@ -87,8 +89,6 @@ class Parser {
                 return messages_1.replicationStart;
             case 73 /* MessageCodes.EmptyQuery */:
                 return messages_1.emptyQuery;
-            case 68 /* MessageCodes.DataRow */:
-                return this.parseDataRowMessage(offset, length, this.buffer);
             case 67 /* MessageCodes.CommandComplete */:
                 return this.parseCommandCompleteMessage(offset, length, this.buffer);
             case 90 /* MessageCodes.ReadyForQuery */:

@@ -145,6 +145,8 @@ export class Parser {
 
   private handlePacket(offset: number, code: number, length: number): BackendMessage {
     switch (code) {
+      case MessageCodes.DataRow:
+        return this.parseDataRowMessage(offset, length, this.buffer)
       case MessageCodes.BindComplete:
         return bindComplete
       case MessageCodes.ParseComplete:
@@ -161,8 +163,6 @@ export class Parser {
         return replicationStart
       case MessageCodes.EmptyQuery:
         return emptyQuery
-      case MessageCodes.DataRow:
-        return this.parseDataRowMessage(offset, length, this.buffer)
       case MessageCodes.CommandComplete:
         return this.parseCommandCompleteMessage(offset, length, this.buffer)
       case MessageCodes.ReadyForQuery:
