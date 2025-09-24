@@ -41,8 +41,6 @@ export type Packet = {
   packet: Buffer
 }
 
-const emptyBuffer = Buffer.allocUnsafe(0)
-
 type StreamOptions = TransformOptions & {
   mode: Mode
 }
@@ -75,9 +73,14 @@ const enum MessageCodes {
 export type MessageCallback = (msg: BackendMessage) => void
 
 export class Parser {
-  private buffer: Buffer = emptyBuffer
+  private buffer: Buffer = Buffer.allocUnsafe(4096)
+
+  /* End of the buffer */
   private bufferLength: number = 0
+
+  /* Start of the buffer */
   private bufferOffset: number = 0
+
   private reader = new BufferReader()
   private mode: Mode
 
@@ -90,7 +93,7 @@ export class Parser {
 
   public parse(buffer: Buffer, callback: MessageCallback) {
     this.mergeBuffer(buffer)
-    const bufferFullLength = this.bufferOffset + this.bufferLength
+    const bufferFullLength = this.bufferLength
     let offset = this.bufferOffset
     while (offset + HEADER_LENGTH <= bufferFullLength) {
       // code is 1 byte long - it identifies the message type
@@ -108,47 +111,38 @@ export class Parser {
     }
     if (offset === bufferFullLength) {
       // No more use for the buffer
-      this.buffer = emptyBuffer
       this.bufferLength = 0
       this.bufferOffset = 0
+
+      if(this.buffer.length > 32*1024) {
+        // If the buffer has grown too big, reset it
+        this.buffer = Buffer.allocUnsafe(4096)
+      }
     } else {
       // Adjust the cursors of remainingBuffer
-      this.bufferLength = bufferFullLength - offset
       this.bufferOffset = offset
     }
   }
 
   private mergeBuffer(buffer: Buffer): void {
-    if (this.bufferLength > 0) {
-      const newLength = this.bufferLength + buffer.byteLength
-      const newFullLength = newLength + this.bufferOffset
-      if (newFullLength > this.buffer.byteLength) {
-        // We can't concat the new buffer with the remaining one
-        let newBuffer: Buffer
-        if (newLength <= this.buffer.byteLength && this.bufferOffset >= this.bufferLength) {
-          // We can move the relevant part to the beginning of the buffer instead of allocating a new buffer
-          newBuffer = this.buffer
-        } else {
-          // Allocate a new larger buffer
-          let newBufferLength = this.buffer.byteLength * 2
-          while (newLength >= newBufferLength) {
-            newBufferLength *= 2
-          }
-          newBuffer = Buffer.allocUnsafeSlow(newBufferLength)
-        }
-        // Move the remaining buffer to the new one
-        this.buffer.copy(newBuffer, 0, this.bufferOffset, this.bufferOffset + this.bufferLength)
-        this.buffer = newBuffer
-        this.bufferOffset = 0
+    if(this.bufferLength + buffer.length > this.buffer.length) {
+      // We need to grow the buffer
+      const bufferContains = this.bufferLength - this.bufferOffset
+      let newBufferLength = (bufferContains + buffer.length) + 2048
+      // round up to the next multiple of 2048
+      newBufferLength = (newBufferLength + 2047) & ~2047
+
+      const newBuffer = Buffer.allocUnsafe(newBufferLength)
+      if(bufferContains > 0) {
+        this.buffer.copy(newBuffer, 0, this.bufferOffset, this.bufferOffset + bufferContains)
       }
-      // Concat the new buffer with the remaining one
-      buffer.copy(this.buffer, this.bufferOffset + this.bufferLength)
-      this.bufferLength = newLength
-    } else {
-      this.buffer = Buffer.from(buffer)
+      this.buffer = newBuffer
       this.bufferOffset = 0
-      this.bufferLength = buffer.byteLength
+      this.bufferLength = bufferContains
     }
+
+    buffer.copy(this.buffer, this.bufferLength)
+    this.bufferLength += buffer.length
   }
 
   private handlePacket(offset: number, code: number, length: number, bytes: Buffer): BackendMessage {
