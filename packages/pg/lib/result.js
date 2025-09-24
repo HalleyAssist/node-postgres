@@ -69,14 +69,11 @@ class Result {
   }
 
   parseRow(rowData) {
-    var row = { ...this._prebuiltEmptyResultObject }
-    for (var i = 0, len = rowData.length; i < len; i++) {
+    let row = { ...this._prebuiltEmptyResultObject }
+    for (let i = 0, len = rowData.length; i < len; i++) {
       var rawValue = rowData[i]
-      var field = this.fields[i].name
       if (rawValue !== null) {
-        row[field] = this._parsers[i](rawValue)
-      } else {
-        row[field] = null
+        row[this.fields[i].name] = this._parsers[i](rawValue)
       }
     }
     return row
@@ -108,7 +105,7 @@ class Result {
         this._parsers[i] = types.getTypeParser(desc.dataTypeID, desc.format || 'text')
       }
     }
-    this._prebuiltEmptyResultObject = { ...row }
+    this._prebuiltEmptyResultObject = row
   }
 }
 
