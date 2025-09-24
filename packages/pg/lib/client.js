@@ -543,16 +543,12 @@ class Client extends EventEmitter {
       query._result._types = this._types
     }
 
-    if (!this._queryable) {
+    if (!this._queryable || this._ending) {
       process.nextTick(() => {
-        query.handleError(new Error('Client has encountered a connection error and is not queryable'), this.connection)
-      })
-      return result
-    }
-
-    if (this._ending) {
-      process.nextTick(() => {
-        query.handleError(new Error('Client was closed and is not queryable'), this.connection)
+        let err
+        if(this._ending) err = new Error('Client was closed and is not queryable')
+        else err = new Error('Client has encountered a connection error and is not queryable')
+        query.handleError(err, this.connection)
       })
       return result
     }
