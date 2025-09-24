@@ -20,7 +20,7 @@ module.exports = {
 function getNodejsStreamFuncs() {
   function getStream(ssl) {
     const net = require('net')
-    const socket = new net.Socket({onread:{buffer: Buffer.allocUnsafeSlow(2048), callback: (n, b)=>socket.emit('data', b.slice(0, n))}})
+    const socket = new net.Socket({onread:{buffer: Buffer.allocUnsafeSlow(4096), callback: (n, b)=>socket.emit('data', b.slice(0, n))}})
     return socket
   }
 

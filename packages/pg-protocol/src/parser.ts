@@ -95,20 +95,18 @@ export class Parser {
     this.mergeBuffer(buffer)
     const bufferFullLength = this.bufferLength
     let offset = this.bufferOffset
-    while (offset + HEADER_LENGTH <= bufferFullLength) {
-      // code is 1 byte long - it identifies the message type
-      const code = this.buffer[offset]
+    const bufferWhileLength = bufferFullLength - HEADER_LENGTH
+    while (offset <= bufferWhileLength) {
       // length is 1 Uint32BE - it is the length of the message EXCLUDING the code
       const length = this.buffer.readUInt32BE(offset + CODE_LENGTH)
       const fullMessageLength = CODE_LENGTH + length
-      if (fullMessageLength + offset <= bufferFullLength) {
-        const message = this.handlePacket(offset + HEADER_LENGTH, code, length, this.buffer)
-        callback(message)
-        offset += fullMessageLength
-      } else {
-        break
-      }
+      if (fullMessageLength + offset > bufferFullLength) break
+
+      const message = this.handlePacket(offset + HEADER_LENGTH, this.buffer[offset], length)
+      callback(message)
+      offset += fullMessageLength
     }
+
     if (offset === bufferFullLength) {
       // No more use for the buffer
       this.bufferLength = 0
@@ -145,7 +143,7 @@ export class Parser {
     this.bufferLength += buffer.length
   }
 
-  private handlePacket(offset: number, code: number, length: number, bytes: Buffer): BackendMessage {
+  private handlePacket(offset: number, code: number, length: number): BackendMessage {
     switch (code) {
       case MessageCodes.BindComplete:
         return bindComplete
@@ -164,33 +162,33 @@ export class Parser {
       case MessageCodes.EmptyQuery:
         return emptyQuery
       case MessageCodes.DataRow:
-        return this.parseDataRowMessage(offset, length, bytes)
+        return this.parseDataRowMessage(offset, length, this.buffer)
       case MessageCodes.CommandComplete:
-        return this.parseCommandCompleteMessage(offset, length, bytes)
+        return this.parseCommandCompleteMessage(offset, length, this.buffer)
       case MessageCodes.ReadyForQuery:
-        return this.parseReadyForQueryMessage(offset, length, bytes)
+        return this.parseReadyForQueryMessage(offset, length, this.buffer)
       case MessageCodes.NotificationResponse:
-        return this.parseNotificationMessage(offset, length, bytes)
+        return this.parseNotificationMessage(offset, length, this.buffer)
       case MessageCodes.AuthenticationResponse:
-        return this.parseAuthenticationResponse(offset, length, bytes)
+        return this.parseAuthenticationResponse(offset, length, this.buffer)
       case MessageCodes.ParameterStatus:
-        return this.parseParameterStatusMessage(offset, length, bytes)
+        return this.parseParameterStatusMessage(offset, length, this.buffer)
       case MessageCodes.BackendKeyData:
-        return this.parseBackendKeyData(offset, length, bytes)
+        return this.parseBackendKeyData(offset, length, this.buffer)
       case MessageCodes.ErrorMessage:
-        return this.parseErrorMessage(offset, length, bytes, 'error')
+        return this.parseErrorMessage(offset, length, this.buffer, 'error')
       case MessageCodes.NoticeMessage:
-        return this.parseErrorMessage(offset, length, bytes, 'notice')
+        return this.parseErrorMessage(offset, length, this.buffer, 'notice')
       case MessageCodes.RowDescriptionMessage:
-        return this.parseRowDescriptionMessage(offset, length, bytes)
+        return this.parseRowDescriptionMessage(offset, length, this.buffer)
       case MessageCodes.ParameterDescriptionMessage:
-        return this.parseParameterDescriptionMessage(offset, length, bytes)
+        return this.parseParameterDescriptionMessage(offset, length, this.buffer)
       case MessageCodes.CopyIn:
-        return this.parseCopyInMessage(offset, length, bytes)
+        return this.parseCopyInMessage(offset, length, this.buffer)
       case MessageCodes.CopyOut:
-        return this.parseCopyOutMessage(offset, length, bytes)
+        return this.parseCopyOutMessage(offset, length, this.buffer)
       case MessageCodes.CopyData:
-        return this.parseCopyData(offset, length, bytes)
+        return this.parseCopyData(offset, length, this.buffer)
       default:
         return new DatabaseError('received invalid response: ' + code.toString(16), length, 'error')
     }

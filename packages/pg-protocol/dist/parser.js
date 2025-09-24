@@ -26,20 +26,16 @@ class Parser {
         this.mergeBuffer(buffer);
         const bufferFullLength = this.bufferLength;
         let offset = this.bufferOffset;
-        while (offset + HEADER_LENGTH <= bufferFullLength) {
-            // code is 1 byte long - it identifies the message type
-            const code = this.buffer[offset];
+        const bufferWhileLength = bufferFullLength - HEADER_LENGTH;
+        while (offset <= bufferWhileLength) {
             // length is 1 Uint32BE - it is the length of the message EXCLUDING the code
             const length = this.buffer.readUInt32BE(offset + CODE_LENGTH);
             const fullMessageLength = CODE_LENGTH + length;
-            if (fullMessageLength + offset <= bufferFullLength) {
-                const message = this.handlePacket(offset + HEADER_LENGTH, code, length, this.buffer);
-                callback(message);
-                offset += fullMessageLength;
-            }
-            else {
+            if (fullMessageLength + offset > bufferFullLength)
                 break;
-            }
+            const message = this.handlePacket(offset + HEADER_LENGTH, this.buffer[offset], length);
+            callback(message);
+            offset += fullMessageLength;
         }
         if (offset === bufferFullLength) {
             // No more use for the buffer
@@ -73,7 +69,7 @@ class Parser {
         buffer.copy(this.buffer, this.bufferLength);
         this.bufferLength += buffer.length;
     }
-    handlePacket(offset, code, length, bytes) {
+    handlePacket(offset, code, length) {
         switch (code) {
             case 50 /* MessageCodes.BindComplete */:
                 return messages_1.bindComplete;
@@ -92,33 +88,33 @@ class Parser {
             case 73 /* MessageCodes.EmptyQuery */:
                 return messages_1.emptyQuery;
             case 68 /* MessageCodes.DataRow */:
-                return this.parseDataRowMessage(offset, length, bytes);
+                return this.parseDataRowMessage(offset, length, this.buffer);
             case 67 /* MessageCodes.CommandComplete */:
-                return this.parseCommandCompleteMessage(offset, length, bytes);
+                return this.parseCommandCompleteMessage(offset, length, this.buffer);
             case 90 /* MessageCodes.ReadyForQuery */:
-                return this.parseReadyForQueryMessage(offset, length, bytes);
+                return this.parseReadyForQueryMessage(offset, length, this.buffer);
             case 65 /* MessageCodes.NotificationResponse */:
-                return this.parseNotificationMessage(offset, length, bytes);
+                return this.parseNotificationMessage(offset, length, this.buffer);
             case 82 /* MessageCodes.AuthenticationResponse */:
-                return this.parseAuthenticationResponse(offset, length, bytes);
+                return this.parseAuthenticationResponse(offset, length, this.buffer);
             case 83 /* MessageCodes.ParameterStatus */:
-                return this.parseParameterStatusMessage(offset, length, bytes);
+                return this.parseParameterStatusMessage(offset, length, this.buffer);
             case 75 /* MessageCodes.BackendKeyData */:
-                return this.parseBackendKeyData(offset, length, bytes);
+                return this.parseBackendKeyData(offset, length, this.buffer);
             case 69 /* MessageCodes.ErrorMessage */:
-                return this.parseErrorMessage(offset, length, bytes, 'error');
+                return this.parseErrorMessage(offset, length, this.buffer, 'error');
             case 78 /* MessageCodes.NoticeMessage */:
-                return this.parseErrorMessage(offset, length, bytes, 'notice');
+                return this.parseErrorMessage(offset, length, this.buffer, 'notice');
             case 84 /* MessageCodes.RowDescriptionMessage */:
-                return this.parseRowDescriptionMessage(offset, length, bytes);
+                return this.parseRowDescriptionMessage(offset, length, this.buffer);
             case 116 /* MessageCodes.ParameterDescriptionMessage */:
-                return this.parseParameterDescriptionMessage(offset, length, bytes);
+                return this.parseParameterDescriptionMessage(offset, length, this.buffer);
             case 71 /* MessageCodes.CopyIn */:
-                return this.parseCopyInMessage(offset, length, bytes);
+                return this.parseCopyInMessage(offset, length, this.buffer);
             case 72 /* MessageCodes.CopyOut */:
-                return this.parseCopyOutMessage(offset, length, bytes);
+                return this.parseCopyOutMessage(offset, length, this.buffer);
             case 100 /* MessageCodes.CopyData */:
-                return this.parseCopyData(offset, length, bytes);
+                return this.parseCopyData(offset, length, this.buffer);
             default:
                 return new messages_1.DatabaseError('received invalid response: ' + code.toString(16), length, 'error');
         }
