@@ -1,8 +1,8 @@
 'use strict'
 
-var types = require('pg-types')
+const types = require('pg-types')
 
-var matchRegexp = /^([A-Za-z]+)(?: (\d+))?(?: (\d+))?/
+const MatchRegexp = /^([A-Za-z]+)(?: (\d+))?(?: (\d+))?/
 
 let parserCache = new Map()
 
@@ -29,7 +29,7 @@ class Result {
 
   // adds a command complete message
   addCommandComplete(msg) {
-    var match = matchRegexp.exec(msg.text ?? msg.command)
+    const match = MatchRegexp.exec(msg.text ?? msg.command)
     if (!match)  return
     this.command = match[1]
     if (match[3]) {
