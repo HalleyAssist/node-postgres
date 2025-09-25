@@ -71,10 +71,9 @@ class Result {
   parseRow(rowData) {
     let row = { ...this._prebuiltEmptyResultObject }
     for (let i = 0, len = rowData.length; i < len; i++) {
-      var rawValue = rowData[i]
-      if (rawValue !== null) {
-        row[this.fields[i].name] = this._parsers[i](rawValue)
-      }
+      let rawValue = rowData[i]
+      if (rawValue === null) continue
+      row[this.fields[i].name] = this._parsers[i](rawValue)
     }
     return row
   }

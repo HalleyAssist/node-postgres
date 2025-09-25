@@ -9,6 +9,7 @@ const CODE_LENGTH = 1;
 // NOT include the code in the length
 const LEN_LENGTH = 4;
 const HEADER_LENGTH = CODE_LENGTH + LEN_LENGTH;
+const sharedDataRow = new messages_1.DataRowMessage(0, []);
 class Parser {
     constructor(opts) {
         this.buffer = Buffer.allocUnsafe(4096);
@@ -187,13 +188,18 @@ class Parser {
     parseDataRowMessage(offset, length, bytes) {
         this.reader.setBuffer(offset, bytes);
         const fieldCount = this.reader.int16();
-        const fields = new Array(fieldCount);
+        let fields = sharedDataRow.fields;
+        if (fields.length !== fieldCount) {
+            fields = new Array(fieldCount);
+            sharedDataRow.fields = fields;
+        }
         for (let i = 0; i < fieldCount; i++) {
             const len = this.reader.int32();
             // a -1 for length means the value of the field is null
             fields[i] = len === -1 ? null : this.reader.string(len);
         }
-        return new messages_1.DataRowMessage(length, fields);
+        sharedDataRow.length = length;
+        return sharedDataRow;
     }
     parseParameterStatusMessage(offset, length, bytes) {
         this.reader.setBuffer(offset, bytes);

@@ -141,11 +141,15 @@ class CommandCompleteMessage {
 }
 exports.CommandCompleteMessage = CommandCompleteMessage;
 class DataRowMessage {
+    get name() {
+        return 'dataRow';
+    }
+    get fieldCount() {
+        return this.fields.length;
+    }
     constructor(length, fields) {
         this.length = length;
         this.fields = fields;
-        this.name = 'dataRow';
-        this.fieldCount = fields.length;
     }
 }
 exports.DataRowMessage = DataRowMessage;

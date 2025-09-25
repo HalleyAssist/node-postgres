@@ -133,8 +133,8 @@ export declare class CommandCompleteMessage {
 export declare class DataRowMessage {
     length: number;
     fields: any[];
-    readonly fieldCount: number;
-    readonly name: MessageName;
+    get name(): MessageName;
+    get fieldCount(): number;
     constructor(length: number, fields: any[]);
 }
 export declare class NoticeMessage implements BackendMessage, NoticeOrError {

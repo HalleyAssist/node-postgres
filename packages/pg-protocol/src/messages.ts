@@ -227,14 +227,16 @@ export class CommandCompleteMessage {
 }
 
 export class DataRowMessage {
-  public readonly fieldCount: number
-  public readonly name: MessageName = 'dataRow'
+  public get name() : MessageName {
+    return 'dataRow'
+  }
+  public get fieldCount (){
+    return this.fields.length
+  }
   constructor(
     public length: number,
     public fields: any[]
-  ) {
-    this.fieldCount = fields.length
-  }
+  ) { }
 }
 
 export class NoticeMessage implements BackendMessage, NoticeOrError {
