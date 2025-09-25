@@ -4,23 +4,19 @@ var types = require('pg-types')
 
 var matchRegexp = /^([A-Za-z]+)(?: (\d+))?(?: (\d+))?/
 
+let parserCache = new Map()
+
 // result object returned from query
 // in the 'end' event and also
 // passed as second argument to provided callback
 class Result {
-  constructor(rowMode, types) {
+  constructor(_rowMode, types) {
     this.command = null
     this.rowCount = null
     this.oid = null
     this.rows = []
     this.fields = []
-    this._parsers = undefined
     this._types = types
-    const rowAsArray = rowMode === 'array'
-    if (rowAsArray) {
-      this.parseRow = this._parseRowAsArray
-    }
-    this._prebuiltEmptyResultObject = null
   }
 
   clear(){
@@ -29,57 +25,29 @@ class Result {
     this.oid = null
     this.rows = []
     this.fields = []
-    this._parsers = undefined
   }
 
   // adds a command complete message
   addCommandComplete(msg) {
-    var match
-    if (msg.text) {
-      // pure javascript
-      match = matchRegexp.exec(msg.text)
-    } else {
-      // native bindings
-      match = matchRegexp.exec(msg.command)
+    var match = matchRegexp.exec(msg.text ?? msg.command)
+    if (!match)  return
+    this.command = match[1]
+    if (match[3]) {
+      // COMMMAND OID ROWS
+      this.oid = parseInt(match[2], 10)
+      this.rowCount = parseInt(match[3], 10)
+    } else if (match[2]) {
+      // COMMAND ROWS
+      this.rowCount = parseInt(match[2], 10)
     }
-    if (match) {
-      this.command = match[1]
-      if (match[3]) {
-        // COMMMAND OID ROWS
-        this.oid = parseInt(match[2], 10)
-        this.rowCount = parseInt(match[3], 10)
-      } else if (match[2]) {
-        // COMMAND ROWS
-        this.rowCount = parseInt(match[2], 10)
-      }
-    }
-  }
-
-  _parseRowAsArray(rowData) {
-    var row = new Array(rowData.length)
-    for (var i = 0, len = rowData.length; i < len; i++) {
-      var rawValue = rowData[i]
-      if (rawValue !== null) {
-        row[i] = this._parsers[i](rawValue)
-      } else {
-        row[i] = null
-      }
-    }
-    return row
-  }
-
-  parseRow(rowData) {
-    let row = { ...this._prebuiltEmptyResultObject }
-    for (let i = 0, len = rowData.length; i < len; i++) {
-      let rawValue = rowData[i]
-      if (rawValue === null) continue
-      row[this.fields[i].name] = this._parsers[i](rawValue)
-    }
-    return row
   }
 
   addRow(row) {
     this.rows.push(row)
+  }
+
+  static _p(p, v) {
+    return v === null ? null : p(v)
   }
 
   addFields(fieldDescriptions) {
@@ -88,23 +56,38 @@ class Result {
     // of rowDescriptions...eg: 'select NOW(); select 1::int;'
     // you need to reset the fields
     this.fields = fieldDescriptions
-    if (this.fields.length) {
-      this._parsers = new Array(fieldDescriptions.length)
-    }
 
-    var row = {}
+    let localTypes = this._types || types
 
-    for (var i = 0; i < fieldDescriptions.length; i++) {
-      var desc = fieldDescriptions[i]
-      row[desc.name] = null
+    let parseFn
+    const cacheKey = fieldDescriptions.map(desc => desc.dataTypeID + "|" + desc.name).join(',')
+    parseFn = parserCache.get(cacheKey)
+    if(!parseFn) {
+      parseFn = 'return function(rowData){return {'
+      let args = [], args2 = []
+      for (let i = 0; i < fieldDescriptions.length; i++) {
+        let desc = fieldDescriptions[i]
 
-      if (this._types) {
-        this._parsers[i] = this._types.getTypeParser(desc.dataTypeID, desc.format || 'text')
-      } else {
-        this._parsers[i] = types.getTypeParser(desc.dataTypeID, desc.format || 'text')
+        const parser = localTypes.getTypeParser(desc.dataTypeID, desc.format || 'text')
+        if(parser === String) {
+          parseFn += `${JSON.stringify(desc.name)}: rowData[${i}],`
+        } else {
+          parseFn += `${JSON.stringify(desc.name)}: _p(a${i},rowData[${i}]),`
+          args.push('a' + i)
+          args2.push(parser)
+        }
       }
+
+      parseFn += '}}'
+      parseFn = new Function('_p', ...args, parseFn)
+      parseFn = parseFn(Result._p, ...args2)
+      if(parserCache.size > 256) {
+        // prevent unbounded memory growth
+        parserCache.clear()
+      }
+      parserCache.set(cacheKey, parseFn)
     }
-    this._prebuiltEmptyResultObject = row
+    this.parseRow = parseFn
   }
 }
 

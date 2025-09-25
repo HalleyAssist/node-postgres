@@ -23,7 +23,7 @@ class Query {
 
     // potential for multiple results
     this._results = this._result
-    this._canceledDueToError = false
+    this._canceledDueToError = null
   }
 
   get text() {
@@ -113,10 +113,8 @@ class Query {
       this._canceledDueToError = err
       return
     }
-
-    //if (this.callback) {
-      this._result.addRow(row)
-    //}
+    
+    this._result.addRow(row)
   }
 
   handleCommandComplete(msg, connection) {
