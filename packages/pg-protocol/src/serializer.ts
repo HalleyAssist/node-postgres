@@ -82,16 +82,12 @@ const parse = (query: ParseOpts): Buffer => {
 
   let len = types.length
 
-  let buffer = writer
+  return writer
     .addCString(name) // name of query
     .addCString(query.text) // actual query text
     .addInt16(len)
-
-  for (let i = 0; i < len; i++) {
-    buffer.addInt32(types[i])
-  }
-
-  return writer.flush(code.parse)
+    .addInt32Array(types)
+    .flush(code.parse)
 }
 
 type ValueMapper = (param: any, index: number) => any
@@ -116,21 +112,22 @@ const enum ParamType {
 const writeValues = function (values: any[], valueMapper?: ValueMapper): void {
   for (let i = 0; i < values.length; i++) {
     const mappedVal = valueMapper ? valueMapper(values[i], i) : values[i]
-    if (mappedVal == null) {
-      // add the param type (string) to the writer
-      writer.addInt16(ParamType.STRING)
-      // write -1 to the param writer to indicate null
-      paramWriter.addInt32(-1)
-    } else if (mappedVal instanceof Buffer) {
+    if (mappedVal instanceof Buffer) {
       // add the param type (binary) to the writer
       writer.addInt16(ParamType.BINARY)
       // add the buffer to the param writer
       paramWriter.addInt32(mappedVal.length)
       paramWriter.add(mappedVal)
     } else {
-      // add the param type (string) to the writer
       writer.addInt16(ParamType.STRING)
-      paramWriter.addString32(mappedVal)
+      if (mappedVal == null) {
+        // add the param type (string) to the writer
+        // write -1 to the param writer to indicate null
+        paramWriter.addInt32(-1)
+      } else {
+        // add the param type (string) to the writer
+        paramWriter.addString32(mappedVal)
+      }
     }
   }
 }

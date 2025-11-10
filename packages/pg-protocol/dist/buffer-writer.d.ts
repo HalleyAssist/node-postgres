@@ -6,6 +6,7 @@ export declare class Writer {
     constructor(size?: number);
     private ensure;
     addInt32(num: number): Writer;
+    addInt32Array(nums: number[]): Writer;
     addInt16(num: number): Writer;
     addCString(string: string): Writer;
     addString(string?: string): Writer;

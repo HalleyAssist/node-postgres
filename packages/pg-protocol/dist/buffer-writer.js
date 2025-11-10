@@ -28,6 +28,15 @@ class Writer {
         this.offset += 4;
         return this;
     }
+    addInt32Array(nums) {
+        this.ensure(4 * nums.length);
+        // use Node Buffer native method for big-endian 32-bit integer
+        for (let i = 0; i < nums.length; i++) {
+            this.buffer.writeInt32BE(nums[i], this.offset);
+            this.offset += 4;
+        }
+        return this;
+    }
     addInt16(num) {
         this.ensure(2);
         // use Node Buffer native method for big-endian 16-bit integer

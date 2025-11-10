@@ -47,26 +47,18 @@ const parse = (query) => {
     }
     const types = query.types || emptyArray;
     let len = types.length;
-    let buffer = writer
+    return writer
         .addCString(name) // name of query
         .addCString(query.text) // actual query text
-        .addInt16(len);
-    for (let i = 0; i < len; i++) {
-        buffer.addInt32(types[i]);
-    }
-    return writer.flush(80 /* code.parse */);
+        .addInt16(len)
+        .addInt32Array(types)
+        .flush(80 /* code.parse */);
 };
 const paramWriter = new buffer_writer_1.Writer();
 const writeValues = function (values, valueMapper) {
     for (let i = 0; i < values.length; i++) {
         const mappedVal = valueMapper ? valueMapper(values[i], i) : values[i];
-        if (mappedVal == null) {
-            // add the param type (string) to the writer
-            writer.addInt16(0 /* ParamType.STRING */);
-            // write -1 to the param writer to indicate null
-            paramWriter.addInt32(-1);
-        }
-        else if (mappedVal instanceof Buffer) {
+        if (mappedVal instanceof Buffer) {
             // add the param type (binary) to the writer
             writer.addInt16(1 /* ParamType.BINARY */);
             // add the buffer to the param writer
@@ -74,9 +66,16 @@ const writeValues = function (values, valueMapper) {
             paramWriter.add(mappedVal);
         }
         else {
-            // add the param type (string) to the writer
             writer.addInt16(0 /* ParamType.STRING */);
-            paramWriter.addString32(mappedVal);
+            if (mappedVal == null) {
+                // add the param type (string) to the writer
+                // write -1 to the param writer to indicate null
+                paramWriter.addInt32(-1);
+            }
+            else {
+                // add the param type (string) to the writer
+                paramWriter.addString32(mappedVal);
+            }
         }
     }
 };

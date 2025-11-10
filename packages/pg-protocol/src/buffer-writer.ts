@@ -30,6 +30,17 @@ export class Writer {
     return this
   }
 
+  public addInt32Array(nums: number[]): Writer {
+    this.ensure(4*nums.length)
+    // use Node Buffer native method for big-endian 32-bit integer
+    for(let i=0; i<nums.length; i++) {
+      this.buffer.writeInt32BE(nums[i], this.offset)
+      this.offset += 4
+    }
+    
+    return this
+  }
+
   public addInt16(num: number): Writer {
     this.ensure(2)
     // use Node Buffer native method for big-endian 16-bit integer
