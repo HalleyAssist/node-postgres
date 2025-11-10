@@ -24,17 +24,17 @@ export class Writer {
 
   public addInt32(num: number): Writer {
     this.ensure(4)
-    this.buffer[this.offset++] = (num >>> 24) & 0xff
-    this.buffer[this.offset++] = (num >>> 16) & 0xff
-    this.buffer[this.offset++] = (num >>> 8) & 0xff
-    this.buffer[this.offset++] = (num >>> 0) & 0xff
+    // use Node Buffer native method for big-endian 32-bit integer
+    this.buffer.writeInt32BE(num, this.offset)
+    this.offset += 4
     return this
   }
 
   public addInt16(num: number): Writer {
     this.ensure(2)
-    this.buffer[this.offset++] = (num >>> 8) & 0xff
-    this.buffer[this.offset++] = (num >>> 0) & 0xff
+    // use Node Buffer native method for big-endian 16-bit integer
+    this.buffer.writeInt16BE(num, this.offset)
+    this.offset += 2
     return this
   }
 
@@ -44,7 +44,8 @@ export class Writer {
     } else {
       let len = Buffer.byteLength(string)
       this.ensure(len + 1) // +1 for null terminator
-      this.buffer.write(string, this.offset, 'utf-8')
+      // write with explicit length and utf8 encoding
+      this.buffer.write(string, this.offset, len, 'utf8')
       this.offset += len
     }
 
@@ -55,20 +56,24 @@ export class Writer {
   public addString(string: string = ''): Writer {
     let len = Buffer.byteLength(string)
     this.ensure(len)
-    this.buffer.write(string, this.offset)
-    this.offset += len
+    // pass explicit length and encoding to avoid incorrect arg ordering
+    if (len > 0) {
+      this.buffer.write(string, this.offset, len, 'utf8')
+      this.offset += len
+    }
     return this
   }
 
   public addString32(string: string = ''): Writer {
     let len = Buffer.byteLength(string)
     this.ensure(len + 4)
-    this.buffer[this.offset++] = (len >>> 24) & 0xff
-    this.buffer[this.offset++] = (len >>> 16) & 0xff
-    this.buffer[this.offset++] = (len >>> 8) & 0xff
-    this.buffer[this.offset++] = (len >>> 0) & 0xff
-    this.buffer.write(string, this.offset)
-    this.offset += len
+    // write 32-bit length prefix in big-endian order
+    this.buffer.writeInt32BE(len, this.offset)
+    this.offset += 4
+    if (len > 0) {
+      this.buffer.write(string, this.offset, len, 'utf8')
+      this.offset += len
+    }
     return this
   }
 
